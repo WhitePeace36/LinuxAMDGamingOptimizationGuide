@@ -11,17 +11,27 @@ First of all you want to enable your XMP profile for your RAM.
 
 Then do these settings:
 
-Resizeable Bar - Auto/Enable
-Above 4G Decoding - Enable
-Amd fTPM - Disable // There has been some bugs where this caused some stutters, but i don't know if this is fixed already. Better to turn it off.
-CSM Supoort - DISABLE !!! This is needed in disable for resizable bar support
-Core Performance Boost - auto/enable
-CPPC - ENABLE
-CPPC preferred cores - ENABLE
-Global C state Control - ENABLE
-AMD cool & quiet - ENABLE // this and some others are very important to being able to use the amd-pstate or amd-pstate-epp cpufreq driver
+`Resizeable Bar - Auto/Enable`
+
+`Above 4G Decoding - Enable`
+
+`Amd fTPM - Disable` There has been some bugs where this caused some stutters, but i don't know if this is fixed already. Better to turn it off.
+
+`CSM Supoort - DISABLE `!!! This is needed in disable for resizable bar support !
+
+`Core Performance Boost - auto/enable`
+
+`CPPC - ENABLE`
+
+`CPPC preferred cores - ENABLE`
+
+`Global C state Control - ENABLE`
+
+`AMD cool & quiet - ENABLE` // this and some others are very important to being able to use the amd-pstate or amd-pstate-epp cpufreq driver
+
 and right around amd cool & quite also needs to be something like this:
-PState - PState0
+
+`PState - PState0`
 
 Also dont forget to set the Cooler graphs of your fans in the case and cpu cooler in the cooler section in the bios.
 
