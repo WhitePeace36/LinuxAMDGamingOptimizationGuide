@@ -83,7 +83,7 @@ output example:
 
 `amd-pstate`
 
-This will be very imporant for the kernel commandline parameter amd_pstate, which can be passive,active or guided.
+This will be very imporant for the kernel commandline parameter amd_pstate, which can be `passive`,`active` or `guided`.
 
 Here the best performant is active. Which lets the hardware handle boosting of the cpu frequency BUT this does not always work, some hardware just cannot boost itself.
 That is why its important to have some tools like mission-center with which you can check if the cpu frequency is boosted above the base clock. If amd_pstate=active does not work, then use amd_pstate=passive.
