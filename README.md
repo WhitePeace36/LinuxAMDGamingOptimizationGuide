@@ -1,5 +1,3 @@
-[TOC]
-
 # Introduction
 ## Linux AMD Gaming OptimizationGuide
 This Repo has descriptions of how to optimize the gaming experience on Linux with AMD cpu and amd gpu
@@ -214,3 +212,23 @@ net.core.netdev_max_backlog = 16384
 `net.ipv4.tcp_congestion_control=bbr` tcp congestion control algorithm bbr, better latency
 
 `net.core.netdev_max_backlog = 16384` increasing buffer where the kernel stores packets after they’ve been pulled off the physical network card (NIC) but before the CPU has had a chance to process them.
+
+# Sched Ext schedulers
+
+There are a lot of different schedulers which can help for specific usecases you might have.
+The default EEVDF is more build for throughput than responsiveness and gaming.
+
+So for gaming i would recommend LAVD in performance mode or PANDEMONIUM, you can find them in the `scx-scheds` package in arch. Or just build them from source for example: https://github.com/sched-ext/scx or https://github.com/wllclngn/PANDEMONIUM
+
+By default cachyOs uses `scx-manager` which is a gui which makes configuring them easier.
+
+What you have to look out for is that you don't use ananicy while using most of the scx sched-ext scheduler because ananicy will change nice levels, io levels and so on. CachyOs has ananicy enabled by default. Here i would recommend to only use it when you use EEVDF scheduler and not with `scx-scheds` 
+
+You can disable ananicy with: `systemctl disable --now ananicy.service`
+
+# Other optimizations
+
+Another thing i noticed is that some application like firefox (in my case librewolf) set some threads/processes to Realtime priority, which can then not be handelt by EEVDF or sched ext schedulers and can lead to a lot of stutters.
+And they use RTKit to set this RT priority. So we can just mask it with `sudo systemctl mask rtkit-daemon.service` but pay attention that your compositor still has RT prio, to have low latency otherwise that can be a problem. For KDE plasma this is no Problem because it sets its PRIO to RT with the Capabilites of linux. So they are not dependent on rtkit.
+The only thing is that pipewire also uses rtkit and will now not have no RT prio. But this should not be problem with LAVD or PANDEMONIUM.
+But if you still have issues then try increasing the Quantum size of the buffers in pipewire. 
