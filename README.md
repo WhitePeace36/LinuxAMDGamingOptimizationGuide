@@ -259,8 +259,11 @@ performance level to `high` does NOT always boost frequencies to the highest clo
 # Other optimizations
 
 Another thing i noticed is that some application like firefox (in my case librewolf) set some threads/processes to Realtime priority, which can then not be handelt by EEVDF or sched ext schedulers and can lead to a lot of stutters.
+
 And they use RTKit to set this RT priority. So we can just mask it with `sudo systemctl mask rtkit-daemon.service` but pay attention that your compositor still has RT prio, to have low latency otherwise that can be a problem. For KDE plasma this is no Problem because it sets its PRIO to RT with the Capabilites of linux. So they are not dependent on rtkit.
+
 The only thing is that pipewire also uses rtkit and will now not have no RT prio. But this should not be problem with LAVD or PANDEMONIUM.
+
 But if you still have issues then try increasing the Quantum size of the buffers in pipewire. 
 
 # Disclaimer
