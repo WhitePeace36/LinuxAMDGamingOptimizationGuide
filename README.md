@@ -226,9 +226,33 @@ What you have to look out for is that you don't use ananicy while using most of 
 
 You can disable ananicy with: `systemctl disable --now ananicy.service`
 
+# Lact
+
+We also want to optimize the GPU performance.
+
+With lact this is very easy.
+
+just dowload it and then max the power usage limit to max or however you desire.
+And for the most imporant part, you need to set the performance level to `manual` and then the power profile mode to `3D_FULLSCREEN` or `COMPUTE`.
+
+Or even better `CUSTOM` when you want to configure it yourself.
+
+Important is here to set performance level to `manual` otherwise power profile mode does nothing.
+
+You can of course also play around with the other stuff in lact.
+
+## Important
+
+performance level to `high` does NOT always boost frequencies to the highest clock rate.
+
+
 # Other optimizations
 
 Another thing i noticed is that some application like firefox (in my case librewolf) set some threads/processes to Realtime priority, which can then not be handelt by EEVDF or sched ext schedulers and can lead to a lot of stutters.
 And they use RTKit to set this RT priority. So we can just mask it with `sudo systemctl mask rtkit-daemon.service` but pay attention that your compositor still has RT prio, to have low latency otherwise that can be a problem. For KDE plasma this is no Problem because it sets its PRIO to RT with the Capabilites of linux. So they are not dependent on rtkit.
 The only thing is that pipewire also uses rtkit and will now not have no RT prio. But this should not be problem with LAVD or PANDEMONIUM.
 But if you still have issues then try increasing the Quantum size of the buffers in pipewire. 
+
+# Disclaimer
+
+If you found some issues here or have other optimizations which might be useful then you can create a Issue/PR if you want to.
