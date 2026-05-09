@@ -1,6 +1,48 @@
 # Introduction
+
+## Disclaimer
+
+If you found some issues here or have other optimizations which might be useful then you can create a Issue/PR if you want to.
+
+Furthermore NOTHING of this is mendatory and you are free to apply and use what you want. I am just documenting what i found, use and some things which made problems for me.
+
 ## Linux AMD Gaming OptimizationGuide
-This Repo has descriptions of how to optimize the gaming experience on Linux with AMD cpu and amd gpu
+
+This Repo has descriptions of how to optimize the gaming experience on Linux with AMD cpu and amd gpu.
+
+This configuration i use is NOT meant to save power or be extra secure. Its also NOT meant to drastically improve performance.
+
+The most imporant part i want to achieve is lower input/output latency and consistency !
+
+Because a few more FPS won't matter at all, you might not even notice it, but when we optimize for consistency then we have the goal to keep the frametime as steady as possible and that is very noticeable.
+
+Like the latency, the latency for the mouse or generally the system is also very noticable but not needed at all for server, so this is for desktop use only. 
+
+Even when you still can use some stuff fore the server, a lot of it would need to be changed, even into the other direction (so for more throughput instead of latency).
+
+### Generally
+
+Latency and throughput are always tradeoffs. It either goes into one direction or the other, so you will have to decide for yourself.
+
+
+## My System Specs
+
+For context i will show my pc specs here.
+
+```
+Operating System: CachyOS Linux 
+KDE Plasma Version: 6.6.4
+KDE Frameworks Version: 6.25.0
+Qt Version: 6.11.0
+Kernel Version: 7.1.0-rc2-273-tkg-eevdf-llvm-ga293ec25d59d (64-bit)
+Graphics Platform: Wayland
+Processors: 16 × AMD Ryzen 7 5800X3D 8-Core Processor
+Memory: 32 GiB of RAM (31,3 GiB usable)
+Graphics Processor: AMD Radeon RX 7900 XTX
+Manufacturer: Gigabyte Technology Co., Ltd.
+Product Name: X570 AORUS MASTER
+System Version: -CF
+```
 
 # Bios Settings
 
@@ -134,7 +176,7 @@ amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog proces
 
 `transparent_hugepage_tmpfs=never` Disables THP tmpfs (temporary file systems stored in RAM) So that there are no files which are stored as THPs in RAM otherwise same as with transparent_hugepage happens.
 
-`amdgpu.dcdebugmask=0x4` disable Display Stream Compression DSC
+`amdgpu.dcdebugmask=0x4` disable Display Stream Compression DSC. For this you would need to check if the DP or HMDI cable you are using and the port on your Monitor and GPU are fast enough for the resolution and refresh rate your are using. Because it could be that you can use the current configuration of resolution and resfresh rate only with DSC. So in this case you should not disable it.
 
 # Sysctl settings
 ## My Settings
@@ -171,6 +213,9 @@ net.ipv4.tcp_congestion_control=bbr
 net.core.netdev_max_backlog = 16384
 ```
 
+Some of these like `vm.dirty_ratio=80`, `net.core.rmem_default=8388608` and `net.core.wmem_default=8388608` are more meant for systems with higher RAM amount like 32GB because they essentialy make programms use a little more ram in the case of the receive and sende buffer, or profit from more available/unused ram like `vm.dirty_ratio=80` but you are free to adjust them.
+
+The only thing i can recommend when you adjust `vm.dirty_ratio` then maybe also think about `vm.dirty_background_bytes` and `vm.dirty_writeback_centisecs`.
 ## Descriptions of each parameter I used and why
 
 `vm.swappiness` Says how strong the pressure is to put stale stuff in memory into Swap the lower the less the pressure
@@ -255,6 +300,25 @@ You can of course also play around with the other stuff in lact.
 
 performance level to `high` does NOT always boost frequencies to the highest clock rate.
 
+# Custom Kernels
+
+Nowadays its very easy to use custom kernels, because cachyos already offers a wide variety of kernels with different cpu schedulers and optimizations applied.
+
+Therefore you can just use one of them or just try a few of them and see what fits your use case.
+
+If you still want to compile your own kernel because you want to change some things but don't want it to be to complicated then i can only recommend: linux-tkg https://github.com/Frogging-Family/linux-tkg
+
+They make it really easy to configure basic stuff in the `customization.cfg` file. There is even a way to very simply apply your own patched if you want to.
+
+# Graphics driver
+
+For the driver you can just use the default `mesa` one if you want to, except when you want to have bugfixes and other stuff faster then you are also free to try `mesa-git`
+
+One the other hand when you want to really optimize it then i can recommend: `mesa-git` from the frogging family same as the linux-tkg. https://github.com/Frogging-Family/mesa-git
+
+They also make it here very simple to configure it and to compile it yourself.
+
+Here you can apply cpu optimizations and other stuff which you might not have otherwise.
 
 # Other optimizations
 
@@ -265,7 +329,3 @@ And they use RTKit to set this RT priority. So we can just mask it with `sudo sy
 The only thing is that pipewire also uses rtkit and will now not have no RT prio. But this should not be problem with LAVD or PANDEMONIUM.
 
 But if you still have issues then try increasing the Quantum size of the buffers in pipewire. 
-
-# Disclaimer
-
-If you found some issues here or have other optimizations which might be useful then you can create a Issue/PR if you want to.
