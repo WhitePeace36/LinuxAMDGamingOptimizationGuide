@@ -44,6 +44,8 @@ Product Name: X570 AORUS MASTER
 System Version: -CF
 ```
 
+I also use the sched-ext sched PANDEMONIUM right now in adaptive mode. Which works like a charm.
+
 # Bios Settings
 
 ## Settings Bios Settings
