@@ -72,13 +72,13 @@ Then do these settings:
 
 `Global C state Control - ENABLE`
 
-`AMD cool & quiet - ENABLE` // this and some others are very important to being able to use the amd-pstate or amd-pstate-epp cpufreq driver
+`AMD cool & quiet - ENABLE` this and some others are very important to being able to use the amd-pstate or amd-pstate-epp cpufreq driver, and no it is no energy save mode. I know. I also thought so at the beginning until i saw an interview of a amd engineer which said that this option should strictly speaking not exist anymore because this was some feature from FX series cpus but some motherboard manufacturers just kept the setting in the bios and used it to enable the PState modes for the CPU, so control the performance states. Which makes no sense at all but it is like that.
 
-and right around amd cool & quite also needs to be something like this:
+Right around amd cool & quite also needs to be something like this:
 
 `PState - PState0`
 
-Also dont forget to set the Cooler graphs of your fans in the case and cpu cooler in the cooler section in the bios.
+Also dont forget to set the your fan curves of the case and cpu cooler in the fan section in the bios.
 
 ## Validating some of them 
 
@@ -325,6 +325,15 @@ Here you can apply cpu optimizations and other stuff which you might not have ot
 
 # Limits
 
+## Disclaimer
+
+With limits file you have to be careful to only edit this file if you have some backup live iso usb stick. Because when you set some values too high some application don't know how to behave.
+So it can even be that you can't boot into Kde plasma or use the package manager. !!!
+
+But the two things above should be save because i am running them myself and it works fine. But DON'T increase them otherwise you can't boot into Kde plasma anymore because the Linux PAM (Pluggable Authentication Modules). Doesn't like too high limits and can lock you out of your system otherwise. You can still edit them from a linux live usb when you messed up. So no worries.
+
+## Optimizations
+
 We might also want to increase some limits.
 These are available in `/etc/security/limits.conf`
 
@@ -337,12 +346,10 @@ You might want to add these at the bottom:
 * hard  nproc   127461
 ```
 
-## Disclaimer
+- the nofile increases the number of files a process can have open, soft and hard limit. We want this to enable games to have a lot of files open at the same time.
 
-With limits file you have to be careful to only edit this file if you have some backup live iso usb stick. Because when you set some values too high some application don't know how to behave.
-So it can even be that you can't boot into Kde plasma or use the package manager. !!!
+- the nproc sets the number of possible open processes, soft and hard limit. 
 
-But the two things above should be save because i am running them myself and it works fine. But DON'T increase them otherwise you can't boot into Kde plasma anymore. because the Linux PAM (Pluggable Authentication Modules). Doesn't like too high limits.
 
 # Realtime prio optimization
 
