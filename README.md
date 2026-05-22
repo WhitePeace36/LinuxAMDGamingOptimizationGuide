@@ -181,6 +181,14 @@ amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog proces
 
 `amdgpu.dcdebugmask=0x4` disable Display Stream Compression DSC. For this you would need to check if the DP or HMDI cable you are using and the port on your Monitor and GPU are fast enough for the resolution and refresh rate your are using. Because it could be that you can use the current configuration of resolution and resfresh rate only with DSC. So in this case you should not disable it.
 
+## Validating
+
+You can check with which kernel paramters the kernel you are booted into was started with/ is using right now. 
+
+With this command:
+
+`cat /proc/cmdline `
+
 # Sysctl settings
 ## My Settings
 
