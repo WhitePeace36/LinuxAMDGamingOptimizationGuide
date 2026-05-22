@@ -330,7 +330,7 @@ Here you can apply cpu optimizations and other stuff which you might not have ot
 With limits file you have to be careful to only edit this file if you have some backup live iso usb stick. Because when you set some values too high some application don't know how to behave.
 So it can even be that you can't boot into Kde plasma or use the package manager. !!!
 
-But the two things above should be save because i am running them myself and it works fine. But DON'T increase them otherwise you can't boot into Kde plasma anymore because the Linux PAM (Pluggable Authentication Modules). Doesn't like too high limits and can lock you out of your system otherwise. You can still edit them from a linux live usb when you messed up. So no worries.
+But the these things should be save because i am running them myself and it works fine. But DON'T increase them otherwise you can't boot into Kde plasma anymore because the Linux PAM (Pluggable Authentication Modules). Doesn't like too high limits and can lock you out of your system otherwise. You can still edit them from a linux live usb when you messed up. So no worries.
 
 ## Optimizations
 
