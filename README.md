@@ -24,6 +24,7 @@ Even when you still can use some stuff fore the server, a lot of it would need t
 
 Latency and throughput are always tradeoffs. It either goes into one direction or the other, so you will have to decide for yourself.
 
+For some of the settings here especially sysctl you will have to uninstall the `cachyos-settings` as this package already applies settings which will override the ones below.
 
 ## My System Specs
 
@@ -129,7 +130,7 @@ output example:
 
 This will be very imporant for the kernel commandline parameter amd_pstate, which can be `passive`,`active` or `guided`.
 
-Here the best performant is active. Which lets the hardware handle boosting of the cpu frequency BUT this does not always work, some hardware just cannot boost itself.
+Here the best performant is `active`. Which lets the hardware handle boosting of the cpu frequency BUT this does not always work, some hardware just cannot boost itself.
 That is why its important to have some tools like mission-center with which you can check if the cpu frequency is boosted above the base clock. If `amd_pstate=active` is set and the cpu frequency is not being boosted above the base frequncy, then use `amd_pstate=passive`.
 
 # Kernel Commandline parameter
@@ -322,7 +323,28 @@ They also make it here very simple to configure it and to compile it yourself.
 
 Here you can apply cpu optimizations and other stuff which you might not have otherwise.
 
-# Other optimizations
+# Limits
+
+We might also want to increase some limits.
+These are available in `/etc/security/limits.conf`
+
+You might want to add these at the bottom:
+
+```
+* soft  nofile  524288
+* hard  nofile  524288
+* soft  nproc   127461
+* hard  nproc   127461
+```
+
+## Disclaimer
+
+With limits file you have to be careful to only edit this file if you have some backup live iso usb stick. Because when you set some values too high some application don't know how to behave.
+So it can even be that you can't boot into Kde plasma or use the package manager. !!!
+
+But the two things above should be save because i am running them myself and it works fine. But DON'T increase them otherwise you can't boot into Kde plasma anymore. because the Linux PAM (Pluggable Authentication Modules). Doesn't like too high limits.
+
+# Realtime prio optimization
 
 Another thing i noticed is that some application like firefox (in my case librewolf) set some threads/processes to Realtime priority, which can then not be handelt by EEVDF or sched ext schedulers and can lead to a lot of stutters.
 
@@ -331,3 +353,18 @@ And they use RTKit to set this RT priority. So we can just mask it with `sudo sy
 The only thing is that pipewire also uses rtkit and will now not have no RT prio. But this should not be problem with LAVD or PANDEMONIUM.
 
 But if you still have issues then try increasing the Quantum size of the buffers in pipewire. 
+
+## General Realtime prio information 
+
+If you are curious which programs have Realtime Priority then you can use `htop` and order the PRI coloumn descendingly. Every process which has a NEGATIVE PRI is a realtime process and either has the SCHED type FIFO or RR (RoundRobin). 
+
+Real time prio processes never get scheduler by the cpu scheduler. They get their timeslice before the rest of the cpu timeslice gets handed to the cpu scheduler to schedule.
+
+ - With RR (RoundRobin) they get always a timeslice from each cpu time slice. So the normal cpu scheduler does not schedule these processes. But the timeslice of RoundRobin processes is still limited so the other processes still get some cpu time. 
+ 
+ - With FIFO (FirstInFirstOut) this changes. Programms which have this sched type can take as much cpu time as they want. So it can starve all other Processess on the system. WE DON'T WANT THIS. 
+  TLDR: it can cause freezes, laggs, stutters.
+
+  This is also the reason why we want to disable ananicy because some of the default used rules set some processes to FIFO and RoundRobin which is bad.
+  
+  Some programs also use the rtkit daemon to set themselves to RT prio and we also don't want that. This is the reason why we want to mask `rtkit-daemon.service`.
