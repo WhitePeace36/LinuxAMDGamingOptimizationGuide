@@ -321,6 +321,37 @@ If you still want to compile your own kernel because you want to change some thi
 
 They make it really easy to configure basic stuff in the `customization.cfg` file. There is even a way to very simply apply your own patched if you want to.
 
+## Tick modes
+
+A kernel can have different tick modes. There are:
+
+`NO_HZ_IDLE` A kernel which lets run idle cpu cores as tickless and as soon as they are used they switch to `HZ_PERIODIC` and get a tick every tick rate you have set.
+
+`HZ_PERIODIC` This always sends the tick to all cores.
+
+`NO_HZ_FULL` when you have a kernel which is compiled with this flag and you have this cmdline parameter `nohz_full` set then the specified core run in tickless mode and get no ticks at all. But you have to at least have 1 core which is not in the list because the kernel needs 1 housekeeping core, which does the work which comes with a tick.
+
+This `nohz_full` cmdline parameter can also be combined with the following others: `rcu_nocbs` and `irqaffinity` to really take advantage of it.
+
+A kernel can be compiled with `NO_HZ_FULL` but uses `NO_HZ_IDLE` by default when `nohz_full` cmdline parameter is not set.
+
+## What we want
+
+We want to have here `NO_HZ_IDLE` which is the default for most kernels or `HZ_PERIODIC`for consistency and regular intervals.
+
+With preferably a tick rate of 1000 for gaming. To make the system more responsive.
+
+To keep stuff consistent. 
+
+Tickless seems nice at first, but it is not really that consistent. You can easily feel it with the mouse. The movement is inconsistent. That comes from the way the rescheduling works there. It does not happen in regular intervals, the rescheduling interval is dynamic in `nohz_full` mode and we don't want that.
+
+## Validate
+
+You can see your tick mode and tick rate of the running kernel with: 
+
+`zcat /proc/config.gz | grep "CONFIG_HZ\|CONFIG_NO_HZ"`
+
+
 # Graphics driver
 
 For the driver you can just use the default `mesa` one if you want to, except when you want to have bugfixes and other stuff faster then you are also free to try `mesa-git`
@@ -354,9 +385,11 @@ You might want to add these at the bottom:
 * hard  nproc   127461
 ```
 
-- the nofile increases the number of files a process can have open, soft and hard limit. We want this to enable games to have a lot of files open at the same time.
+- the nofile increases the number of files a process can have open, soft and hard limit. We want this to enable games to have a lot of files open at the same time. per user
 
-- the nproc sets the number of possible open processes, soft and hard limit. 
+- the nproc sets the number of possible open processes, soft and hard limit. per user
+
+The sysctl settings we set above are system wide.
 
 
 # Realtime prio optimization
