@@ -347,7 +347,7 @@ Tickless seems nice at first, but it is not really that consistent. You can easi
 
 ## Validate
 
-You can see your tick mode and tick rate of the running kernel with: 
+You can see your tick mode and tick rate the running kernel was compiled with with this command: 
 
 `zcat /proc/config.gz | grep "CONFIG_HZ\|CONFIG_NO_HZ"`
 
