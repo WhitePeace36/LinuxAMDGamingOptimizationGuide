@@ -45,7 +45,7 @@ Product Name: X570 AORUS MASTER
 System Version: -CF
 ```
 
-I also use the sched-ext sched PANDEMONIUM in bpf mode right now. Which works like a charm.
+I also use the sched-ext sched PANDEMONIUM in bpf or adaptive mode, because sometimes the one is better and sometimes the other. They work great.
 
 # Bios Settings
 
