@@ -46,6 +46,7 @@ System Version: -CF
 ```
 
 I also use the sched-ext sched PANDEMONIUM in bpf or adaptive mode, because sometimes the one is better and sometimes the other. They work great.
+But i personally find the adaptive mode to be working better.
 
 # Bios Settings
 
@@ -132,6 +133,110 @@ This will be very imporant for the kernel commandline parameter amd_pstate, whic
 
 Here the best performant is `active`. Which lets the hardware handle boosting of the cpu frequency BUT this does not always work, some hardware just cannot boost itself.
 That is why its important to have some tools like mission-center with which you can check if the cpu frequency is boosted above the base clock. If `amd_pstate=active` is set and the cpu frequency is not being boosted above the base frequncy, then use `amd_pstate=passive`.
+
+# CPU governor
+
+The cpu governer is like a power profile which you can set for the cpu to tell him how aggressive to boost the cpu frequencies.
+
+You can check your used governers for every core like this:
+
+`cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`
+
+might look something like this:
+
+```
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+ondemand
+```
+
+With this you can see all available governers for your cpu:
+
+`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors`
+
+might look like this:
+
+`conservative ondemand userspace powersave performance schedutil`
+
+What we want for maximal performance is the performance profile.
+
+we can set that with:
+
+`echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor` or `cpupower` or some other tool you might have.
+
+the we can read again the used governer with `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors` to validate if it changed correctly.
+
+and might look like this:
+
+```
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+performance
+```
+
+But now it is only temporary until the next restart of the pc. What we can do is make a systemd service file which executes on startup and then starts a script with root privileges.
+Which then in turn sets the governer to performance.
+
+## Make permanent 
+
+My Service file looked like this:
+
+```
+[Unit]
+Description=Set some system tweaks
+[Service]
+ExecStart=/home/someone/Autostart/tweaks.sh
+[Install]
+WantedBy=multi-user.target
+```
+
+you can make a file like `tweaks.service` and save the stuff from above in it. Then save it in `/etc/systemd/system/`.
+
+Then you need to exchange the path at `ExecStart` with your own of the script. The script should have as owner and group to `root` and permissions `744` for security, because this file is being executed as root and when don't want anyone not being root to change the file.
+
+then you can make the script:
+
+```
+#! /bin/bash
+
+echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+```
+
+and save it in some file like `tweaks.sh`.
+
+Then we just need to start and enable it with `sudo systemctl enable --now tweaks.service`
+
+and you should be good to go. you can check the status of the script with `systemctl status tweaks.service`
+
+## Additional information
+
+https://wiki.archlinux.org/title/CPU_frequency_scaling
 
 # Kernel Commandline parameter
 
