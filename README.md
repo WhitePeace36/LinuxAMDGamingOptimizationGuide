@@ -134,7 +134,7 @@ This will be very imporant for the kernel commandline parameter amd_pstate, whic
 Here the best performant is `active`. Which lets the hardware handle boosting of the cpu frequency BUT this does not always work, some hardware just cannot boost itself.
 That is why its important to have some tools like mission-center with which you can check if the cpu frequency is boosted above the base clock. If `amd_pstate=active` is set and the cpu frequency is not being boosted above the base frequncy, then use `amd_pstate=passive`.
 
-# CPU governor
+# CPU Frequency Scaling
 
 The cpu governer is like a power profile which you can set for the cpu to tell him how aggressive to boost the cpu frequencies.
 
