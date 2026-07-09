@@ -78,6 +78,8 @@ Right around amd cool & quite also needs to be something like this:
 
 `PState - PState0`
 
+`XHCI Handoff - DISABLE` This setting should be somewhere in the usb settings. This can cause really nasty stutters in some games.
+
 Also dont forget to set the your fan curves of the case and cpu cooler in the fan section in the bios.
 
 ## Validating some of them 
