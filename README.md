@@ -45,8 +45,7 @@ Product Name: X570 AORUS MASTER
 System Version: -CF
 ```
 
-I also use the sched-ext sched PANDEMONIUM in bpf or adaptive mode, because sometimes the one is better and sometimes the other. They work great.
-But i personally find the adaptive mode to be working better.
+I now also use the sched-ext sched https://github.com/WhitePeace36/Lunar_sched in dsqs_per_cpu mode. Which i created myself for exactly this scenario.
 
 # Bios Settings
 
@@ -389,7 +388,7 @@ The only thing i can recommend when you adjust `vm.dirty_ratio` then maybe also 
 There are a lot of different schedulers which can help for specific usecases you might have.
 The default EEVDF is more build for throughput than responsiveness and gaming.
 
-So for gaming i would recommend LAVD in performance mode or PANDEMONIUM, you can find them in the `scx-scheds` package in arch. Or just build them from source for example: https://github.com/sched-ext/scx or https://github.com/wllclngn/PANDEMONIUM
+So for gaming i would recommend https://github.com/WhitePeace36/Lunar_sched. I wrote it myself just for this scenario. To keep eveything as consistent as possible.
 
 By default cachyOs uses `scx-manager` which is a gui which makes configuring them easier.
 
