@@ -47,6 +47,10 @@ System Version: -CF
 
 I now also use the sched-ext sched https://github.com/WhitePeace36/Lunar_sched in dsqs_per_cpu mode. Which i created myself for exactly this scenario.
 
+But this scheduler is still in active development so there can be regular updates to the repo.
+
+A alternative would be LAVD or PANDEMONIUM. But these scheduler do not prioritize consistency. So not as optimal for gaming.
+
 # Bios Settings
 
 ## Settings Bios Settings
