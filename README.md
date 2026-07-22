@@ -45,11 +45,9 @@ Product Name: X570 AORUS MASTER
 System Version: -CF
 ```
 
-I now also use the sched-ext sched https://github.com/WhitePeace36/Lunar_sched in dsqs_per_cpu mode. Which i created myself for exactly this scenario.
+For the CPU scheduler i am using. I am switching between my own Lunar scheduler which i wrote, LAVD in gaming mode and PANDEMONIUM. Just try which you like the most. All 3 are great choices.
 
-But this scheduler is still in active development so there can be regular updates to the repo.
-
-A alternative would be LAVD or PANDEMONIUM. But these scheduler do not prioritize consistency. So not as optimal for gaming.
+But the best to start with is LAVD in gaming mode. Might even be the best of the 3 for gaming.
 
 # Bios Settings
 
