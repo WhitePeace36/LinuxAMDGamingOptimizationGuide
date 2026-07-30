@@ -47,7 +47,7 @@ System Version: -CF
 
 For the CPU scheduler i am using. I am switching between my own Lunar scheduler which i wrote, LAVD in gaming mode and PANDEMONIUM. Just try which you like the most. All 3 are great choices.
 
-But the best to start with is LAVD in gaming mode. Might even be the best of the 3 for gaming.
+But i would recommend Lunar the most of course and it is also the best in my opinion for the desktop use case.
 
 # Bios Settings
 
