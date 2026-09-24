@@ -4,7 +4,7 @@
 
 If you found some issues here or have other optimizations which might be useful then you can create a Issue/PR if you want to.
 
-Furthermore NOTHING of this is mendatory and you are free to apply and use what you want. I am just documenting what i found, use and some things which made problems for me.
+Furthermore NOTHING of this is mandatory and you are free to apply and use what you want. I am just documenting what i found, use and some things which made problems for me.
 
 ## Linux AMD Gaming OptimizationGuide
 
@@ -304,7 +304,7 @@ First of all i want to show you my sysctl:
 
 ```
 vm.swappiness=1
-net.core.busy_read=50
+net.core.busy_read=0
 vm.max_map_count=2147483642
 vm.vfs_cache_pressure=50
 vm.dirty_ratio=80
@@ -339,7 +339,8 @@ The only thing i can recommend when you adjust `vm.dirty_ratio` then maybe also 
 
 `vm.swappiness` Says how strong the pressure is to put stale stuff in memory into Swap the lower the less the pressure
 
-`net.core.busy_read=50` By setting this value to 50 (which represents 50 microseconds), you are telling the kernel: "When a process asks to read from a network socket and no data is there, don't put the process to sleep immediately. Instead, keep the CPU actively looping (polling) for up to 50 microseconds to see if data arrives."
+`net.core.busy_read=0` By setting this value to 50 (which represents 50 microseconds), you are telling the kernel: "When a process asks to read from a network socket and no data is there, don't put the process to sleep immediately. Instead, keep the CPU actively looping (polling) for up to 50 microseconds to see if data arrives." This setting is a tradeoff. As little network latency as possible for network heavy applications but you are sacrificing cpu time which could be spent on other stuff.
+I had it on 50 microseconds for a long time but now that i write a cpu scheduler i have turned it back to 0 because for the usecase i am chasing, which is as smooth desktop experience as possible, these 50 microseconds make a huge difference.
 
 `vm.max_map_count=2147483642` extend max available Virtual Memory Areas per process
 
