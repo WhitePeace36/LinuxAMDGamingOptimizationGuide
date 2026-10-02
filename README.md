@@ -233,6 +233,8 @@ echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 and save it in some file like `tweaks.sh`.
 
+But you might also be able to add in to a file in `/etc/tmpfiles.d/` like for example `/etc/tmpfiles.d/gpu.conf` like described below in the Tmpfiles section.
+
 Then we just need to start and enable it with `sudo systemctl enable --now tweaks.service`
 
 and you should be good to go. you can check the status of the script with `systemctl status tweaks.service`
