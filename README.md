@@ -246,7 +246,7 @@ https://wiki.archlinux.org/title/CPU_frequency_scaling
 First of all i want to show my command line parameters:
 
 ```
-amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog processor.max_cstate=1 transparent_hugepage=never vm.zone_reclaim_mode=0 audit=0 pcie_aspm=off ignore_rlimit_data split_lock_detect=off split_lock_mitigate=0 preempt=full libahci.ignore_sss=1 loglevel=3 rd.systemd.show_status=false transparent_hugepage_tmpfs=never amdgpu.dcdebugmask=0x4
+amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog processor.max_cstate=1 transparent_hugepage=always vm.zone_reclaim_mode=0 audit=0 pcie_aspm=off ignore_rlimit_data split_lock_detect=off split_lock_mitigate=0 preempt=full libahci.ignore_sss=1 loglevel=3 rd.systemd.show_status=false transparent_hugepage_tmpfs=always amdgpu.dcdebugmask=0x4
 ```
 
 ## Descriptions of each parameter I used and why
@@ -263,7 +263,7 @@ amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog proces
 
 `processor.max_cstate=1` sets the max C state or better said idle state to C1. It normally goes until C6 or even lower. The higher the number the deeper the sleep state. The deeper the sleep state the higher the wakup latency, to minimize the latency we do max cstate to 1 and i think you need the Global C state Control option enabled in the bios to really benefit from it.
 
-`transparent_hugepage=never` disable transparent hugepages, normal pagesize is 4KB when THP is enabled every page is handles as a Hugepage and has around 2MB which might enhance the performance in some cases but it also leads to stutters in other cases and we want to optimize for smoothness so we disable it to reduce stutter/lag. When enabled the kernel starts a process in the background called khugepaged which tries to compress the THP pages in RAM, which causes stutters, lags and hangs and we dont want that.
+`transparent_hugepage=always` always enable thp pages. When we combine them with the tmpfile settings and the sysctl virtual memory (vm) settings then they cooperate very much.
 
 `vm.zone_reclaim_mode=0` tells the kernel to not reclaim already used ram from other application hastly
 
@@ -285,7 +285,7 @@ amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog proces
 
 `rd.systemd.show_status=false` Hides service start messages during the ramdisk phase.
 
-`transparent_hugepage_tmpfs=never` Disables THP tmpfs (temporary file systems stored in RAM) So that there are no files which are stored as THPs in RAM otherwise same as with transparent_hugepage happens.
+`transparent_hugepage_tmpfs=always` always enable thp pages. When we combine them with the tmpfile settings and the sysctl virtual memory (vm) settings then they cooperate very much.
 
 `amdgpu.dcdebugmask=0x4` disable Display Stream Compression DSC. For this you would need to check if the DP or HMDI cable you are using and the port on your Monitor and GPU are fast enough for the resolution and refresh rate your are using. Because it could be that you can use the current configuration of resolution and resfresh rate only with DSC. So in this case you should not disable it.
 
@@ -303,22 +303,23 @@ With this command:
 First of all i want to show you my sysctl:
 
 ```
-vm.swappiness=100
+vm.swappiness=150
 net.core.busy_read=0
 vm.max_map_count=2147483642
 vm.vfs_cache_pressure=50
-vm.dirty_ratio=80
+vm.dirty_bytes = 536870912
 vm.dirty_background_bytes = 67108864
 net.ipv4.tcp_mtu_probing=1
 vm.page_lock_unfairness=3
 kernel.printk_devkmsg=off
 vm.stat_interval=10
 vm.zone_reclaim_mode=0
+vm.page-cluster = 0
 
 vm.compaction_proactiveness = 40
 vm.watermark_scale_factor = 500
 vm.watermark_boost_factor = 15000
-vm.defrag_mode = 1
+vm.defrag_mode = 0
 
 vm.overcommit_memory=1
 kernel.threads-max=1073741823
@@ -342,7 +343,7 @@ Some of these like `vm.dirty_ratio=80`, `net.core.rmem_default=8388608` and `net
 The only thing i can recommend when you adjust `vm.dirty_ratio` then maybe also think about `vm.dirty_background_bytes` and `vm.dirty_writeback_centisecs`.
 ## Descriptions of each parameter I used and why
 
-`vm.swappiness=100` Says how strong the pressure is to put stale stuff in memory into Swap the lower the less the pressure. This makes only sense to use with a swapfile with zswap or some other swap method like zram.
+`vm.swappiness=150` Says how strong the pressure is to put stale stuff in memory into Swap the lower the less the pressure. This makes only sense to use with a swapfile with zswap or some other swap method like zram. Where zram is the best and fastest method.
 
 `net.core.busy_read=0` By setting this value to 50 (which represents 50 microseconds), you are telling the kernel: "When a process asks to read from a network socket and no data is there, don't put the process to sleep immediately. Instead, keep the CPU actively looping (polling) for up to 50 microseconds to see if data arrives." This setting is a tradeoff. As little network latency as possible for network heavy applications but you are sacrificing cpu time which could be spent on other stuff.
 I had it on 50 microseconds for a long time but now that i write a cpu scheduler i have turned it back to 0 because for the usecase i am chasing, which is as smooth desktop experience as possible, these 50 microseconds make a huge difference.
@@ -351,7 +352,7 @@ I had it on 50 microseconds for a long time but now that i write a cpu scheduler
 
 `vm.vfs_cache_pressure=50` lower memory reclaim pressure from reclaiming memory used for caching directory and inode objects
 
-`vm.dirty_ratio=80` kernel can use up to 80% of the ram for delaying of writing of files to disk before hanging and writing everything to disk. The pro is smoother operation but the downside is possible dataloss on powerloss.
+`vm.dirty_bytes = 536870912` kernel can use up to 536870912 Bytes of the ram for delaying of writing of files to disk before hanging and writing everything to disk. You can go lower or higher. Doesn't really make that much of a difference. The only reason why i found to keep it low is that when a programm calls fsync that it does not need to flush out gigabytes at a time.
 
 `vm.dirty_background_bytes = 67108864` bytes from what point on the delayed file writes to disk from ram start in the background without hanging the system
 
@@ -365,13 +366,15 @@ I had it on 50 microseconds for a long time but now that i write a cpu scheduler
 
 `vm.zone_reclaim_mode=0` same as the command line parameter, maybe you dont even need this here if you have the commandline parameter
 
+`vm.page-cluster = 0` page-cluster controls the number of pages up to which consecutive pages are read in from swap in a single attempt. This is the swap counterpart to page cache readahead. We don't want to have this when we use zram because we don't need to readahead any pages because the zram is memory compressed in memory. So reading is really fast.
+
 `vm.compaction_proactiveness=40` controls how eagerly the kernel defragments free RAM in the background with the `kcompactd` process. Over time free memory gets scattered into small pieces, so even with many GB free there might be no larger contiguous block left. Some allocations (for example from the GPU driver) need such larger blocks. When none is available, the program that asked for it has to wait while the kernel defragments memory right on the spot (direct compaction). THIS is what causes the stutters, not kcompactd itself. The value goes from 0 to 100, default is 20. With 40, kcompactd starts working when the fragmentation score goes above ~70 and stops at ~60. `0` disables background compaction completely, which moves all that work into your game. For me `0` caused hundreds of stalls during gameplay, with 40 they were gone. Don't go too high though, because moving memory pages also briefly disturbs the programs which own them.
 
 `vm.watermark_scale_factor=500` sets how early kswapd starts to free memory in the background. The kernel has 3 watermarks for free memory: min, low and high. When free memory drops below low, kswapd wakes up and frees memory (mostly file cache) until free memory is above high again. Only when free memory reaches min, the program itself has to free memory and waits for it (direct reclaim). The unit is 1/10000 of the RAM, so the default 10 is 0.1% and 500 is 5%. With 32GB RAM that means kswapd starts at ~1.7GB free and stops at ~3.3GB free. This gives the background threads enough headroom, so programs practically never have to free memory themselves. The downside is that cache is dropped a bit earlier and when your RAM is really full with programs the system starts struggling earlier, so it's good to combine it with zswap + swapfile or zram.
 
 `vm.watermark_boost_factor=15000` is the kernel default (some guides set it to 0). RAM is managed in blocks of ~2MB which are reserved either for movable or unmovable memory. When the kernel has to take memory from a block of the wrong type (fallback), that block gets mixed and can never be fully defragmented again. This setting tells the kernel to react to such an event by temporarily raising the high watermark, so kswapd frees extra memory and then wakes kcompactd to clean up. The unit is 1/10000 of the high watermark, so 15000 means up to 150%. `0` disables this reaction.
 
-`vm.defrag_mode=1` only exists on newer kernels (check with `sysctl vm.defrag_mode`). It makes the kernel try much harder to not mix memory blocks in the first place. Instead of falling back into a block of the wrong type, it frees and defragments memory first, and the background threads try to keep whole blocks free. IMPORTANT: only use it together with a higher `vm.watermark_scale_factor`! With the default watermarks the background threads can't keep up and the extra work lands on your programs. The kernel docs recommend to enable it right at boot (so via the sysctl file), because fragmentation which already exists can stay.
+`vm.defrag_mode=0` only exists on newer kernels (check with `sysctl vm.defrag_mode`). It makes the kernel try much harder to not mix memory blocks in the first place. Instead of falling back into a block of the wrong type, it frees and defragments memory first. And that is the issue. The trying to defragment memory first which leads to stalls. Which is want we don't want.
 
 `vm.overcommit_memory=1` tell applications they can commit as much as they want. TLDR: Always say yes to memory allocations.
 
@@ -379,7 +382,7 @@ I had it on 50 microseconds for a long time but now that i write a cpu scheduler
 
 `kernel.split_lock_mitigate=0` same as in kernl parameters, very likely not even needed here
 
-`vm.dirty_writeback_centisecs=60` tries to flush dirty pages each 0.6 seconds to the disk. This is a lot more often than the default but this is the best option when combined with `vm.dirty_ratio=80` where we never really are hanging hard to write everything but with `vm.dirty_background_bytes = 67108864` which is very low when we start writing stuff to disk early and frequently but always in the background, so we keep stuff consistent and can guarantee no lag spikes, sutters or hangs from this. It does not happen until 80% of ram is full with it, which will never happen. Btw the kernel can reclaim these dirty memory pages all the time when ram is needed.
+`vm.dirty_writeback_centisecs=100` tries to flush dirty pages each 1 seconds to the disk. This is a lot more often than the default but this is the best option when combined with `vm.dirty_bytes = 536870912` where we rarely are hanging hard to write everything but with `vm.dirty_background_bytes = 67108864` which is very low when we start writing stuff to disk early and frequently but always in the background, so we keep stuff consistent and can guarantee as little lag spikes as possible. It does not happen until 536870912 bytes of ram is full with it or a programm calls fsync. Btw the kernel can reclaim these dirty memory pages all the time when ram is needed. But the dirty pages first need to get written to disk which will cause stutters for the programm which tries to allocate memory.
 
 `net.core.rmem_max=16777216` set max TCP/UDP receive buffer size. 
 
@@ -417,11 +420,51 @@ This can be tuned with these values:
 vm.compaction_proactiveness = 40
 vm.watermark_scale_factor = 500
 vm.watermark_boost_factor = 15000
-vm.defrag_mode = 1
+vm.defrag_mode = 0
 ```
 
 The options are described above.
-To use these options the best i would recommand a swap file with zswap.
+To use these options the best i would recommand zram instead of any other swap method.
+
+# Tmpfiles
+
+For these settings we need to create the file /etc/tmpfiles.d/thp.conf for systemd systems.
+
+This settings are complementative with these kernel command line parameter:
+
+```
+transparent_hugepage=always transparent_hugepage_tmpfs=always
+```
+and all the virtual memory(vm) settings from above.
+
+These settings make sure to have as little stalls as possible when a programm tries to allocate memory. 
+So we try to make use of `khugepaged, kswapd, kcompactd` as much as possible. To keep the memory defragmented and ready in the background instead at the time of allocation. This will reduce memory related stutters to a minimum or completely eliminate them.
+
+Here we put these settings:
+
+```
+w /sys/kernel/mm/transparent_hugepage/defrag            - - - - defer
+w /sys/kernel/mm/transparent_hugepage/shmem_enabled     - - - - always
+w /sys/kernel/mm/transparent_hugepage/shrink_underused  - - - - 0
+w /sys/kernel/mm/transparent_hugepage/khugepaged/pages_to_scan - - - - 8192
+w /sys/kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs - - - - 2500
+w /sys/module/zswap/parameters/enabled - - - - 0
+```
+
+With the `w` we write values into these files at startup.
+
+
+`/sys/kernel/mm/transparent_hugepage/defrag            - - - - defer ` this controls what happens when a programm tries to allocate a thp page and none is available. In this case it will not block and try to defragment the memory but will for the time being give the programm a 4kb page and prepares the thp page in the background. So we can garuantee as little stutters as possible.
+
+`/sys/kernel/mm/transparent_hugepage/shmem_enabled     - - - - always` always use thp for shared memory.
+
+`/sys/kernel/mm/transparent_hugepage/shrink_underused  - - - - 0` don't shrink underused thp pages. This will lead to a little more ram usage but will help with smoothness.
+
+`/sys/kernel/mm/transparent_hugepage/khugepaged/pages_to_scan - - - - 8192` This is a setting for the `khugepaged` daemon which is the daemon which does compress normal memory pages to THP pages in the background. It says how much 4kb pages it will collaps to thp pages per wake.
+
+`/sys/kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs - - - - 2500` This changes the frequency with which the `khugepaged` is woken and will create thp pages in the background.
+
+`/sys/module/zswap/parameters/enabled - - - - 0` With this we disable zswap to make use of zram.
 
 # Sched Ext schedulers
 
