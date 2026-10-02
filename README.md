@@ -251,7 +251,7 @@ First of all i want to show my command line parameters:
 amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog processor.max_cstate=1 transparent_hugepage=always vm.zone_reclaim_mode=0 audit=0 pcie_aspm=off ignore_rlimit_data split_lock_detect=off split_lock_mitigate=0 preempt=full libahci.ignore_sss=1 loglevel=3 rd.systemd.show_status=false transparent_hugepage_tmpfs=always amdgpu.dcdebugmask=0x4
 ```
 
-Important note!!! The transparent hugepage settings need most of the virtual memory(vm) settings from the sysctl section and the settings from the tmpfiles section to work the best. Otherwise they can be counterproductive.
+Important note!!! The transparent hugepage settings need most of the virtual memory(vm) settings from the sysctl section, the settings from the tmpfiles section and the zram to work the best. Otherwise they can be counterproductive.
 
 ## Descriptions of each parameter I used and why
 
@@ -469,6 +469,44 @@ With the `w` we write values into these files at startup.
 `/sys/kernel/mm/transparent_hugepage/khugepaged/scan_sleep_millisecs - - - - 2500` This changes the frequency with which the `khugepaged` is woken and will create thp pages in the background.
 
 `/sys/module/zswap/parameters/enabled - - - - 0` With this we disable zswap to make use of zram.
+
+# Setting up zram 
+
+Zram is somelike a swap space inside the ram. It compresses part of not often used or unused parts of the ram inside the zram space which is compressed. It is very fast for with decrompression into normal ram again and vice versa. This is needed for the watermark settings from the virtual memory(vm) sysctl section.
+
+You can check if you already have one with `swapon --show`
+
+and it should show something like this:
+
+```
+NAME       TYPE       SIZE USED PRIO
+/dev/zram0 partition 15,6G 4,3G  100
+```
+
+When there is only one entry with zram then you are already good and can skip the other steps.
+
+First you need to install the `zram-generator` package from your repos.
+
+Then create the file `/etc/systemd/zram-generator.conf`
+
+and put this inside:
+
+```
+[zram0]
+zram-size = ram
+compression-algorithm = zstd
+swap-priority = 100
+fs-type = swap
+```
+
+Then save it.
+
+then you need todo: `sudo systemctl daemon-reload` and then `sudo systemctl start systemd-zram-setup@zram0.service`.
+
+Now you can check if it is running with `swapon --show` as seen above.
+
+You will need to write 0 to the `/sys/module/zswap/parameters/enabled` file at startup to disable zswap because it does interfere with zram. This is already described in the tmpfiles section.
+
 
 # Sched Ext schedulers
 
