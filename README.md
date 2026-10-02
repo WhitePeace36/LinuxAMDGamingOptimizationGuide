@@ -251,6 +251,8 @@ First of all i want to show my command line parameters:
 amd-pstate=passive amdgpu.aspm=0 amdgpu.audio=0 nmi_watchdog=0 nowatchdog processor.max_cstate=1 transparent_hugepage=always vm.zone_reclaim_mode=0 audit=0 pcie_aspm=off ignore_rlimit_data split_lock_detect=off split_lock_mitigate=0 preempt=full libahci.ignore_sss=1 loglevel=3 rd.systemd.show_status=false transparent_hugepage_tmpfs=always amdgpu.dcdebugmask=0x4
 ```
 
+Important note!!! The transparent hugepage settings need most of the virtual memory(vm) settings from the sysctl section and the settings from the tmpfiles section to work the best. Otherwise they can be counterproductive.
+
 ## Descriptions of each parameter I used and why
 
 `amd-pstate` as already described above tells the kernel if the kernel should use control the cpu frequency or the hardware itself. I have amd-pstate=passive because my hardware is not able to boost itself and is otherwise locked to the base frequency.
