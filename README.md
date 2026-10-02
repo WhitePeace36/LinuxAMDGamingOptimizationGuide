@@ -526,9 +526,9 @@ Then there is `Elara`. Which is intended to be used with ananicy. It was little 
 
 By default cachyOs uses `scx-manager` which is a gui which makes configuring them easier.
 
-What you have to look out for is that you don't use ananicy while using most of the scx sched-ext scheduler because ananicy will change nice levels, io levels and so on. CachyOs has ananicy enabled by default. Here i would recommend to only use it when you use EEVDF scheduler and not with `scx-scheds` 
+To use ananicy or not depends entirely on the scheduler you are using. Most scheduler in `scx-scheds` don't work nice with `ananicy`. But that depends on the scheduler. Cachyos has `ananicy` enabled by default btw.
 
-You can disable ananicy with: `systemctl disable --now ananicy.service`
+You can disable ananicy with: `systemctl disable --now ananicy.service` if you want to. But as i said. depends on the scheduler.
 
 # Lact
 
@@ -650,7 +650,7 @@ Real time prio processes never get scheduler by the cpu scheduler. They get thei
  
  - With FIFO (FirstInFirstOut) this changes. Programms which have this sched type can take as much cpu time as they want. So it can starve all other Processess on the system. WE DON'T WANT THIS. 
   TLDR: it can cause freezes, laggs, stutters.
-
-  This is also the reason why we want to disable ananicy because some of the default used rules set some processes to FIFO and RoundRobin which is bad.
   
   Some programs also use the rtkit daemon to set themselves to RT prio and we also don't want that. This is the reason why we want to mask `rtkit-daemon.service`.
+  
+  When you really want to set some programms to Realtime prio then use ananicy for it. There you can at least control the which programm gets to get what.
