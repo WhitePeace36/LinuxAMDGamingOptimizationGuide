@@ -513,11 +513,11 @@ You will need to write 0 to the `/sys/module/zswap/parameters/enabled` file at s
 There are a lot of different schedulers which can help for specific usecases you might have.
 The default EEVDF is more build for throughput than responsiveness and gaming.
 
-So for gaming i would recommend https://github.com/WhitePeace36/Lunar_sched or https://github.com/WhitePeace36/Elara . `Lunar_sched` is intended to be used without ananicy and works with classifying threads by their behavior.
+So for gaming i would recommend https://github.com/WhitePeace36/Lunar_sched or https://github.com/WhitePeace36/Elara . `Lunar_sched` is intended to be used without `ananicy-cpp` and works with classifying threads by their behavior.
 
 But this is not 100% perfect but you don't need todo anything you don't need to nice anything or such. It handles everything automatically. Except realtime threads. It cannot handle these. Same as every other scx scheduler.
 
-Then there is `Elara`. Which is intended to be used with ananicy. It was little inspired from the windows scheduler but a better version of it. Where the nice value is used for prio not for cpu time like with the default schedulers. If you want to know more you can look into the description of the scheduler. You might also want to adjust the ananicy profiles. The preconfigured stuff will not fit great with this scheduler.
+Then there is `Elara`. Which is intended to be used with `ananicy-cpp`. It was little inspired from the windows scheduler but a better version of it. Where the nice value is used for prio not for cpu time like with the default schedulers. If you want to know more you can look into the description of the scheduler. You might also want to adjust the `ananicy-cpp` profiles. The preconfigured stuff will not fit great with this scheduler.
 
 `Band 0` should be something like xwayland, kwin, pipewire or such stuff. With a nice value of -12 or higher.
 `Band 1` should be somthing like your game. With a nice value of -5 or such.
@@ -526,9 +526,9 @@ Then there is `Elara`. Which is intended to be used with ananicy. It was little 
 
 By default cachyOs uses `scx-manager` which is a gui which makes configuring them easier.
 
-To use ananicy or not depends entirely on the scheduler you are using. Most scheduler in `scx-scheds` don't work nice with `ananicy`. But that depends on the scheduler. Cachyos has `ananicy` enabled by default btw.
+To use `ananicy-cpp` or not depends entirely on the scheduler you are using. Most scheduler in `scx-scheds` don't work nice with `ananicy-cpp`. But that depends on the scheduler. Cachyos has `ananicy-cpp` enabled by default btw.
 
-You can disable ananicy with: `systemctl disable --now ananicy.service` if you want to. But as i said. depends on the scheduler.
+You can disable `ananicy-cpp` with: `systemctl disable --now ananicy-cpp.service` if you want to. But as i said. depends on the scheduler.
 
 # Lact
 
@@ -653,4 +653,4 @@ Real time prio processes never get scheduler by the cpu scheduler. They get thei
   
   Some programs also use the rtkit daemon to set themselves to RT prio and we also don't want that. This is the reason why we want to mask `rtkit-daemon.service`.
   
-  When you really want to set some programms to Realtime prio then use ananicy for it. There you can at least control the which programm gets to get what.
+  When you really want to set some programms to Realtime prio then use `ananicy-cpp` for it. There you can at least control the which programm gets to get what.
