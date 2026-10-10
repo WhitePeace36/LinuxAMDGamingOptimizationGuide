@@ -320,7 +320,7 @@ vm.stat_interval=10
 vm.zone_reclaim_mode=0
 vm.page-cluster = 0
 
-vm.compaction_proactiveness = 40
+vm.compaction_proactiveness = 80
 vm.watermark_scale_factor = 500
 vm.watermark_boost_factor = 15000
 vm.defrag_mode = 0
@@ -372,13 +372,13 @@ I had it on 50 microseconds for a long time but now that i write a cpu scheduler
 
 `vm.page-cluster = 0` page-cluster controls the number of pages up to which consecutive pages are read in from swap in a single attempt. This is the swap counterpart to page cache readahead. We don't want to have this when we use zram because we don't need to readahead any pages because the zram is memory compressed in memory. So reading is really fast.
 
-`vm.compaction_proactiveness=40` controls how eagerly the kernel defragments free RAM in the background with the `kcompactd` process. Over time free memory gets scattered into small pieces, so even with many GB free there might be no larger contiguous block left. Some allocations (for example from the GPU driver) need such larger blocks. When none is available, the program that asked for it has to wait while the kernel defragments memory right on the spot (direct compaction). THIS is what causes the stutters, not kcompactd itself. The value goes from 0 to 100, default is 20. With 40, kcompactd starts working when the fragmentation score goes above ~70 and stops at ~60. `0` disables background compaction completely, which moves all that work into your game. For me `0` caused hundreds of stalls during gameplay, with 40 they were gone. Don't go too high though, because moving memory pages also briefly disturbs the programs which own them.
+`vm.compaction_proactiveness=80` controls how eagerly the kernel defragments free RAM in the background with the `kcompactd` process. Over time free memory gets scattered into small pieces, so even with many GB free there might be no larger contiguous block left. Some allocations (for example from the GPU driver) need such larger blocks. When none is available, the program that asked for it has to wait while the kernel defragments memory right on the spot (direct compaction). THIS is what causes the stutters, not kcompactd itself. The value goes from 0 to 100, default is 20. With 80, kcompactd starts working when the fragmentation score goes above ~30 and stops at ~20. `0` disables background compaction completely. For me `0` caused hundreds of stalls during gameplay, with 80 they were gone.
 
 `vm.watermark_scale_factor=500` sets how early kswapd starts to free memory in the background. The kernel has 3 watermarks for free memory: min, low and high. When free memory drops below low, kswapd wakes up and frees memory (mostly file cache) until free memory is above high again. Only when free memory reaches min, the program itself has to free memory and waits for it (direct reclaim). The unit is 1/10000 of the RAM, so the default 10 is 0.1% and 500 is 5%. With 32GB RAM that means kswapd starts at ~1.7GB free and stops at ~3.3GB free. This gives the background threads enough headroom, so programs practically never have to free memory themselves. The downside is that cache is dropped a bit earlier and when your RAM is really full with programs the system starts struggling earlier, so it's good to combine it with zswap + swapfile or zram.
 
 `vm.watermark_boost_factor=15000` is the kernel default (some guides set it to 0). RAM is managed in blocks of ~2MB which are reserved either for movable or unmovable memory. When the kernel has to take memory from a block of the wrong type (fallback), that block gets mixed and can never be fully defragmented again. This setting tells the kernel to react to such an event by temporarily raising the high watermark, so kswapd frees extra memory and then wakes kcompactd to clean up. The unit is 1/10000 of the high watermark, so 15000 means up to 150%. `0` disables this reaction.
 
-`vm.defrag_mode=0` only exists on newer kernels (check with `sysctl vm.defrag_mode`). It makes the kernel try much harder to not mix memory blocks in the first place. Instead of falling back into a block of the wrong type, it frees and defragments memory first. And that is the issue. The trying to defragment memory first which leads to stalls. Which is want we don't want.
+`vm.defrag_mode=0` It makes the kernel try much harder to not mix memory blocks in the first place. Instead of falling back into a block of the wrong type, it frees and defragments memory first. And that is the issue. The trying to defragment memory first which leads to stalls. Which is want we don't want.
 
 `vm.overcommit_memory=1` tell applications they can commit as much as they want. TLDR: Always say yes to memory allocations.
 
